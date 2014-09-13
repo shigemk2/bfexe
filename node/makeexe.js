@@ -145,6 +145,21 @@ function main() {
   codes += align(15);
   codes += "\x40\00\x30\xc0";
 
+  codes += align(57);
+
+  codes += "\x6a\x41\xff\x15\x30\x20\x40\00\x58\xc3";
+
+  // align
+  codes += align(503);
+
+  // idt
+  codes += "\x28\x20";
+  codes += align(11);
+  codes += "\x48\x20";
+  codes += align(3);
+  codes += "\x30\x20";
+  codes += align(25);
+
   return codes;
 };
 fs.writeFile("a.exe", main(), 'binary', function (err) {
