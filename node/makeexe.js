@@ -166,6 +166,18 @@ function main() {
   codes += "\x38\x20";
   codes += align(9);
 
+  // putchar
+  codes += "putchar";
+  codes += align(5);
+
+  codes += "\x20\00";
+  codes += align(2);
+
+  codes += "msvcrt.dll";
+
+  // align
+  codes += align(431);
+
   return codes;
 };
 fs.writeFile("a.exe", main(), 'binary', function (err) {
