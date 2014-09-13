@@ -69,35 +69,51 @@ function main() {
 
   codes += align(9);
 
-  // // nth.FileHeader.SizeOfOptionalHeader
-  // codes += "\x23";
+  // nth.FileHeader.SizeOfOptionalHeader
+  codes += "\xe0\00";
 
-  // codes += "\x01\x02";
+  codes += "\x02\x01";
 
-  // // nth.OptionalHeader
-  // codes += "\x01\x0b";
-  // codes += "\x0a";
-  // codes += "\x02\00";
-  // codes += "\x10\00";
-  // codes += "\x10\00";
-  // codes += "\x20\00";
-  // codes += "\x40\00\00";
-  // codes += "\x10\00";
-  // codes += "\x02\00";
-  // codes += "\x05";
-  // codes += "\x01";
-  // codes += "\x05";
-  // codes += "\x01";
-  // codes += "\x30\00";
-  // codes += "\x02\00";
-  // codes += "\x03";
-  // codes += "\x10\00\00";
-  // codes += "\00\x10\00";
-  // codes += "\x10\00\00";
-  // codes += "\00\x10\00";
-  // codes += "\x16";
-  // codes += "\00\00\x20\00";
-  // codes += "\00\00\x10\00";
+  // nth.OptionalHeader
+  codes += "\x0b\x01";
+  codes += "\x0a\00";
+  codes += "\00\x02";
+
+  codes += align(11);
+  codes += "\00\x10";
+  codes += align(3);
+  codes += "\00\x10";
+  codes += align(3);
+  codes += "\00\x20";
+  codes += align(5);
+  codes += "\x40\00\00";
+  codes += "\x10\00\00";
+  codes += "\00\x02";
+  codes += align(3);
+  codes += "\x05\00";
+  codes += "\x01\00";
+  codes += align(5);
+  codes += "\x05\00";
+  codes += "\x01\00";
+  codes += align(5);
+  codes += "\00\x30";
+  codes += align(3);
+  codes += "\00\x02";
+  codes += align(7);
+  codes += "\x03\00";
+  codes += align(3);
+  codes += "\00\00\x10\00";
+  codes += "\00\x10";
+  codes += align(5);
+  codes += "\x10\00\00";
+  codes += "\x10\00\00";
+  codes += align(5);
+  codes += "\x10\00";
+  codes += align(11);
+  codes += "\00\x20\00\00";
+  codes += "\x10\00\00\00";
+
+  codes += align(9);
 
   return codes;
 };
