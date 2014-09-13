@@ -1,6 +1,13 @@
 var fs = require('fs');
 
 function main() {
+  function align(size) {
+    var aligned = "";
+    for(var i = 0; i < size - 1; i++) {
+      aligned += "\00";
+    }
+    return aligned;
+  }
   var codes = "";
   codes += "MZ";
   codes += "\x90";
@@ -48,6 +55,8 @@ function main() {
   codes += "\xcd\x21";
 
   codes += "This program cannot be run in DOS mode.\r\r\n$";
+
+  codes += align(8);
 
   return codes;
 };
