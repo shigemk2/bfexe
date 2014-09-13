@@ -38,6 +38,17 @@ function main() {
   codes += "\x80";
   codes += "\00";
   codes += "\00\00";
+
+  codes += "\x0e\x1f";
+  codes += "\xba\x0e";
+  codes += "\x00\xb4";
+  codes += "\x09\xcd";
+  codes += "\x21\xb8";
+  codes += "\x01\x4c";
+  codes += "\xcd\x21";
+
+  codes += "This program cannot be run in DOS mode.\r\r\n$";
+
   return codes;
 };
 fs.writeFile("a.exe", main(), 'binary', function (err) {
