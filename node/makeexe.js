@@ -58,6 +58,47 @@ function main() {
 
   codes += align(8);
 
+  codes += "PE";
+
+  codes += align(3);
+
+  // nth.FileHeader
+  codes += "\x4c\x01";
+  codes += "\02\00";
+  codes += "\x9b\x5f\xa6\x4d";
+
+  codes += align(9);
+
+  // // nth.FileHeader.SizeOfOptionalHeader
+  // codes += "\x23";
+
+  // codes += "\x01\x02";
+
+  // // nth.OptionalHeader
+  // codes += "\x01\x0b";
+  // codes += "\x0a";
+  // codes += "\x02\00";
+  // codes += "\x10\00";
+  // codes += "\x10\00";
+  // codes += "\x20\00";
+  // codes += "\x40\00\00";
+  // codes += "\x10\00";
+  // codes += "\x02\00";
+  // codes += "\x05";
+  // codes += "\x01";
+  // codes += "\x05";
+  // codes += "\x01";
+  // codes += "\x30\00";
+  // codes += "\x02\00";
+  // codes += "\x03";
+  // codes += "\x10\00\00";
+  // codes += "\00\x10\00";
+  // codes += "\x10\00\00";
+  // codes += "\00\x10\00";
+  // codes += "\x16";
+  // codes += "\00\00\x20\00";
+  // codes += "\00\00\x10\00";
+
   return codes;
 };
 fs.writeFile("a.exe", main(), 'binary', function (err) {
