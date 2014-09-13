@@ -115,6 +115,36 @@ function main() {
 
   codes += align(9);
 
+  codes += align(105);
+
+  // sects text
+  codes += ".text";
+
+  codes += align(4);
+
+  codes += "\x34\00";
+  codes += align(3);
+  codes += "\00\x10";
+  codes += align(3);
+  codes += "\00\x02";
+  codes += align(3);
+  codes += "\00\x02";
+
+  codes += align(15);
+  codes += "\x20\00\00\x60";
+
+  codes += ".idata";
+  codes += align(3);
+  codes += "\x54\00";
+  codes += align(3);
+  codes += "\00\x20";
+  codes += align(3);
+  codes += "\00\x02";
+  codes += align(3);
+  codes += "\00\x04";
+  codes += align(15);
+  codes += "\x40\00\x30\xc0";
+
   return codes;
 };
 fs.writeFile("a.exe", main(), 'binary', function (err) {
