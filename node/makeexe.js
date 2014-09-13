@@ -158,7 +158,13 @@ function main() {
   codes += "\x48\x20";
   codes += align(3);
   codes += "\x30\x20";
-  codes += align(25);
+  codes += align(23);
+
+  // ilt iat
+  codes += "\x38\x20";
+  codes += align(7);
+  codes += "\x38\x20";
+  codes += align(9);
 
   return codes;
 };
