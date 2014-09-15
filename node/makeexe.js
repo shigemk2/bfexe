@@ -78,6 +78,7 @@ function makeidata(dlls) {
     idt_len += 20;
     ilt_len += (dlls[dll].length + 1) * 4;
     var fs = dlls[dll];
+    // 文字列の長さを数えている(2でアラインメント)
     for (var i = 0; i < fs.length; i++) {
       funcs_len += (((2 + fs[i].length + 2) / 2) | 0) * 2;
     }
@@ -87,13 +88,14 @@ function makeidata(dlls) {
   var funcs_rva = iat_rva + ilt_len;
   var dlls_rva  = funcs_rva + funcs_len;
   var ilt = "", funcs = "", dllnames = "", addrs = {};
+  // idtとiltとiatとH/N Tableのidataを作成
   for (var dll in dlls) {
     idata += convLEs(4, [ilt_rva + ilt.length, 0, 0,
                          dlls_rva + dllnames.length,
                          iat_rva + ilt.length]);
     var fs = dlls[dll];
     for (var i = 0; i < fs.length; i++) {
-      // 機械語の中には仮想アドレスを渡す必要がある
+      // あとの処理で使う。機械語の中には仮想アドレスを渡す必要がある
       addrs[fs[i]] = IMAGEBASE + iat_rva + ilt.length;
       ilt += convLE(4, funcs_rva + funcs.length);
       funcs += "\0\0" + fs[i] + "\0";
