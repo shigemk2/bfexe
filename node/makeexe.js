@@ -1,164 +1,66 @@
-var fs = require('fs');
+var fs = require("fs");
 
-function main() {
-  function align(size) {
-    var aligned = "";
-    for(var i = 0; i < size - 1; i++) {
-      aligned += "\00";
-    }
-    return aligned;
+/**
+ * 指定されたlenだけバイト文字列vをリトルエンディアン変換する
+ * LEはリトルエンディアンの意
+ *
+ * @method convLE
+ * @param {Int} len バイト数
+ * @param {ByteString} v バイト文字列
+ * @return {String} ret リトルエンディアン変換されたバイト文字列
+ */
+function convLE(len, v) {
+  var ret = "";
+  for(var i = 0; i < len; i++) {
+    ret += String.fromCharCode(v & 0xff);
+    v >>= 8;
   }
-  var codes = "";
-  codes += "MZ";
-  codes += "\x90";
-  codes += "\00\03";
-  codes += align(3);
-  codes += "\00\04";
-  codes += align(4);
-  codes += "\xff\xff";
-  codes += align(3);
-  codes += "\xb8";
-  codes += align(6);
-  codes += "\x40";
-  codes += align(38);
-  codes += "\x80";
-  codes += align(4);
+  return ret;
+}
 
-  codes += "\x0e\x1f";
-  codes += "\xba\x0e";
-  codes += "\x00\xb4";
-  codes += "\x09\xcd";
-  codes += "\x21\xb8";
-  codes += "\x01\x4c";
-  codes += "\xcd\x21";
+/**
+ * 指定されたlenだけバイト文字列vをリトルエンディアン変換する 配列版
+ * LEはリトルエンディアンの意
+ *
+ * @method convLEs
+ * @param {Int} len バイト数
+ * @param {Array} vs バイト文字列の配列
+ * @return {String} ret リトルエンディアン変換されたバイト文字列
+ */
+function convLEs(len, vs) {
+  var ret = "";
+  for (var i = 0; i < vs.length; i++) {
+    ret += convLE(len, vs[i]);
+  }
+  return ret;
+}
 
-  codes += "This program cannot be run in DOS mode.\r\r\n$";
+/**
+ * 指定されたlenだけ0を返す
+ *
+ * @method zero
+ * @param {Int} len 桁数
+ * @return {String} ret lenの数ぶんの0
+ */
+function zero(len) {
+  var ret = "";
+  for (var i = 0; i < len; i++) {
+  }
+}
 
-  codes += align(8);
+/**
+ * aの倍数ぶん0詰めする
+ *
+ * @example "abc" という文字列があって、8の倍数ぶんだけ0詰めしたい場合は、align("abc", 8)とすると、"abc00000"が返ってくる
+ *
+ * @method align
+ * @param {String} bytes 文字列
+ * @param {Int} a 倍数
+ * @return {String} ret 倍数分だけ0詰めされた文字列
+ */
+function align(bytes, a) {
+  var m = bytes.length % a;
+  if (m == 0) return "";
+  return zero(a - m);
+}
 
-  codes += "PE";
-
-  codes += align(3);
-
-  // nth.FileHeader
-  codes += "\x4c\x01";
-  codes += "\02\00";
-  codes += "\x9b\x5f\xa6\x4d";
-
-  codes += align(9);
-
-  // nth.FileHeader.SizeOfOptionalHeader
-  codes += "\xe0\00";
-
-  codes += "\x02\x01";
-
-  // nth.OptionalHeader
-  codes += "\x0b\x01";
-  codes += "\x0a\00";
-  codes += "\00\x02";
-
-  codes += align(11);
-  codes += "\00\x10";
-  codes += align(3);
-  codes += "\00\x10";
-  codes += align(3);
-  codes += "\00\x20";
-  codes += align(5);
-  codes += "\x40\00\00";
-  codes += "\x10\00\00";
-  codes += "\00\x02";
-  codes += align(3);
-  codes += "\x05\00";
-  codes += "\x01\00";
-  codes += align(5);
-  codes += "\x05\00";
-  codes += "\x01\00";
-  codes += align(5);
-  codes += "\00\x30";
-  codes += align(3);
-  codes += "\00\x02";
-  codes += align(7);
-  codes += "\x03\00";
-  codes += align(3);
-  codes += "\00\00\x10\00";
-  codes += "\00\x10";
-  codes += align(5);
-  codes += "\x10\00\00";
-  codes += "\x10\00\00";
-  codes += align(5);
-  codes += "\x10\00";
-  codes += align(11);
-  codes += "\00\x20\00\00";
-  codes += "\x10\00\00\00";
-
-  codes += align(9);
-
-  codes += align(105);
-
-  // sects text
-  codes += ".text";
-
-  codes += align(4);
-
-  codes += "\x34\00";
-  codes += align(3);
-  codes += "\00\x10";
-  codes += align(3);
-  codes += "\00\x02";
-  codes += align(3);
-  codes += "\00\x02";
-
-  codes += align(15);
-  codes += "\x20\00\00\x60";
-
-  codes += ".idata";
-  codes += align(3);
-  codes += "\x54\00";
-  codes += align(3);
-  codes += "\00\x20";
-  codes += align(3);
-  codes += "\00\x02";
-  codes += align(3);
-  codes += "\00\x04";
-  codes += align(15);
-  codes += "\x40\00\x30\xc0";
-
-  codes += align(57);
-
-  codes += "\x6a\x41\xff\x15\x30\x20\x40\00\x58\xc3";
-
-  // align
-  codes += align(503);
-
-  // idt
-  codes += "\x28\x20";
-  codes += align(11);
-  codes += "\x48\x20";
-  codes += align(3);
-  codes += "\x30\x20";
-  codes += align(23);
-
-  // ilt iat
-  codes += "\x38\x20";
-  codes += align(7);
-  codes += "\x38\x20";
-  codes += align(9);
-
-  // putchar
-  codes += "putchar";
-  codes += align(5);
-
-  codes += "\x20\00";
-  codes += align(2);
-
-  codes += "msvcrt.dll";
-
-  // align
-  codes += align(431);
-
-  return codes;
-};
-fs.writeFile("a.exe", main(), 'binary', function (err) {
-  // console.log(data);
-  // console.log(err);
-});
