@@ -66,36 +66,47 @@ function align(bytes, a) {
   return zero(a - m);
 }
 
-var idata = "";
+const IMAGEBASE = 0x400000;
+const IDATA_RVA = 0x2000;
+function makeidata(dlls) {
+  var idata = "";
+  // idata(idt ilt iat putchar dllname部分)のバイナリを出力する
+  // idt
+  // ここでいう0x2042はmsvcrt.dll\0の場所を示しており、
+  // 相対仮想アドレス(RVA)の場所
+  // OSが見るものが仮想アドレス
+  // 2000(RVA)
+  idata += convLEs(4, [IDATA_RVA + 0x28, 0, 0,
+                       IDATA_RVA + 0x42,
+                       IDATA_RVA + 0x30]);
+  // 2014(RVA)
+  idata += zero(5 * 4);
 
-// idata(idt ilt iat putchar dllname部分)のバイナリを出力する
-// idt
-// ここでいう0x2042はmsvcrt.dll\0の場所を示しており、
-// 相対仮想アドレス(RVA)の場所
-// OSが見るものが仮想アドレス
-// 2000(RVA)
-idata += convLEs(4, [0x2028, 0, 0, 0x2042, 0x2030]);
-// 2014(RVA)
-idata += zero(5 * 4);
+  // ilt
+  // 2028(RVA)
+  // (使いたいDLLの数+1)*20
+  idata += convLEs(4, [IDATA_RVA + 0x38, 0]);
 
-// ilt
-// 2028(RVA)
-idata += convLEs(4, [0x2038, 0]);
+  // iat
+  // 2030(RVA)
+  // 機械語の中には仮想アドレスを渡す必要がある
+  putchar = IMAGEBASE + IDATA_RVA + idata.length;
+  idata += convLEs(4, [IDATA_RVA + 0x38, 0]);
 
-// iat
-// 2030(RVA)
-// 機械語の中には仮想アドレスを渡す必要がある
-var putchar = 0x402000 + idata.length;
-idata += convLEs(4, [0x2038, 0]);
+  // putchar
+  // 2038(RVA)
+  idata += convLE(2, 0);
+  idata += "putchar\0";
 
-// putchar
-// 2038(RVA)
-idata += convLE(2, 0);
-idata += "putchar\0";
+  // DLL name
+  // 2042(RVA)
+  idata += "msvcrt.dll\0";
 
-// DLL name
-// 2042(RVA)
-idata += "msvcrt.dll\0";
+  return idata;
+}
+
+var idata = makeidata({"msvcrt.dll": ["putchar", "getchar"]});
+
 
 // EXEの実際の処理部分
 var text = "";
@@ -142,7 +153,7 @@ codes += convLE (2, 0x10b);
 codes += convLEs(1, [10, 0]);
 // ImageBaseのデフォルトは0x400000
 codes += convLEs(4, [0x0200, 0, 0, 0x1000, 0x1000, 0x2000,
-                     0x400000, 0x1000, 0x200]);
+                     IMAGEBASE, 0x1000, 0x200]);
 codes += convLEs(2, [5, 1, 0, 0, 5, 1]);
 codes += convLEs(4, [0, 0x3000, 0x0200, 0]);
 codes += convLEs(2, [3, 0]);
@@ -160,11 +171,11 @@ codes += convLE (4, 0x60000020);
 // sects .idata
 codes += ".idata";
 codes += align(codes, 8);
-codes += convLEs(4, [idata.length, 0x2000, 0x0200, 0x0400, 0, 0]);
+codes += convLEs(4, [idata.length, IDATA_RVA, 0x0200, 0x0400, 0, 0]);
 codes += convLEs(2, [0, 0]);
 codes += convLE (4, 0xc0300040);
 
-codes += align(codes, 0x200);
+codes += align(codes, 0x0200);
 
 // .text
 codes += text;
