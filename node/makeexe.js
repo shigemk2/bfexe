@@ -45,7 +45,9 @@ function convLEs(len, vs) {
 function zero(len) {
   var ret = "";
   for (var i = 0; i < len; i++) {
+    ret += "\0";
   }
+  return ret;
 }
 
 /**
@@ -64,16 +66,10 @@ function align(bytes, a) {
   return zero(a - m);
 }
 
-/**
- * idata(idt ilt iat putchar dllname部分)のバイナリを出力する
- *
- * @method getidata
- * @param なし
- * @return {JSON} idata バイナリ文字列, putchar
- */
-function getidata() {
+function main() {
   var idata = "";
 
+  // idata(idt ilt iat putchar dllname部分)のバイナリを出力する
   // idt
   idata += convLEs(4, [0x2028, 0, 0, 0x2042, 0x2030]);
   idata += zero(5 * 4);
@@ -92,27 +88,14 @@ function getidata() {
   // DLL name
   idata += "msvcrt.dll\0";
 
-  return {"idata":idata, "putchar": putchar};
-}
-
-/**
- * EXEの実際の処理部分
- *
- * @method gettext
- * @param {String} idata idata部分のバイナリ文字列
- * @return {String} text 処理のバイナリ文字列
- */
-function gettext(idata, putchar) {
+  // EXEの実際の処理部分
   var text = "";
   text += "\x6a\x41";         // push 0x41
   text += "\xff\x15";         // call [putchar]
   text += convLE(4, putchar);
   text += "\x58";             // pop eax
   text += "\xc3";             // ret
-  return text;
-}
 
-function main() {
   var codes = "";
 
   // DOS Header
@@ -136,21 +119,17 @@ function main() {
   codes += align(codes, 0x80);
 
   // nth.FileHeader
-  var idataJSON = getidata();
-  var idata = idataJSON["idata"];
-  var putchar = idataJSON["putchar"];
-
   codes += "PE\0\0";
-  codes += convLEs(2, [0x014c, 2]);
-  codes += convLEs(4, [0x4ada65f9b, 0, 0]);
-  codes += convLE (2, [0xe0, 0x0102]);
+  codes += convLEs(2, [0x14c, 2]);
+  codes += convLEs(4, [0x4da65f9b, 0, 0]);
+  codes += convLEs(2, [0xe0, 0x102]);
 
   // nth.OptionalHeader
-  codes += convLE (2, 0x010b);
+  codes += convLE (2, 0x10b);
   codes += convLEs(1, [10, 0]);
   codes += convLEs(4, [0x0200, 0, 0, 0x1000, 0x1000, 0x2000,
                       0x400000, 0x1000, 0x200]);
-  codes += convLEs(4, [5, 1, 0, 0, 5, 1]);
+  codes += convLEs(2, [5, 1, 0, 0, 5, 1]);
   codes += convLEs(4, [0, 0x3000, 0x0200, 0]);
   codes += convLEs(2, [3, 0]);
   codes += convLEs(4, [0x100000, 0x1000, 0x100000, 0x1000, 0, 16]);
@@ -158,8 +137,6 @@ function main() {
   codes += zero(14 * 8);
 
   // sects .text
-  var text = gettext(idata, putchar);
-
   codes += ".text";
   codes += align(codes, 8);
   codes += convLEs(4, [text.length, 0x1000, 0x0200, 0x0200, 0, 0]);
