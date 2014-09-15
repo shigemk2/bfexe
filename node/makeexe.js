@@ -70,12 +70,9 @@ const IMAGEBASE = 0x400000;
 const IDATA_RVA = 0x2000;
 function makeidata(dlls) {
   var idata = "";
-
   // IDT, ILT, IAT, funcs, DLLs
   // (使いたいDLLの数+1)*20
-  var idt_len = 20;
-  var ilt_len = 0;
-  var funcs_len = 0;
+  var idt_len = 20, ilt_len = 0, funcs_len = 0;
   // function name
   for (var dll in dlls) {
     idt_len += 20;
@@ -85,20 +82,11 @@ function makeidata(dlls) {
       funcs_len += (((2 + fs[i].length + 2) / 2) | 0) * 2;
     }
   }
-
   var ilt_rva   = IDATA_RVA + idt_len;
   var iat_rva   = ilt_rva + ilt_len;
   var funcs_rva = iat_rva + ilt_len;
   var dlls_rva  = funcs_rva + funcs_len;
-
-  console.log("ilt_rva: ", ilt_rva.toString(16),
-              "iat_rva: ", iat_rva.toString(16),
-              "funcs_rva: ", funcs_rva.toString(16),
-              "dlls_rva: ", dlls_rva.toString(16));
-
-  var ilt = "";
-  var funcs = "";
-  var dllnames = "";
+  var ilt = "", funcs = "", dllnames = "";
   for (var dll in dlls) {
     idata += convLEs(4, [ilt_rva + ilt.length, 0, 0,
                          dlls_rva + dllnames.length,
@@ -112,26 +100,13 @@ function makeidata(dlls) {
     ilt += convLE(4, 0);
     dllnames += dll + "\0";
   }
-
-
-  // idata(idt ilt iat putchar dllname部分)のバイナリを出力する
-  // idt
-  // ここでいう0x2042はmsvcrt.dll\0の場所を示しており、
-  // 相対仮想アドレス(RVA)の場所
-  // OSが見るものが仮想アドレス
   idata += zero(5 * 4);
-
-  // ilt
   idata += ilt;
-
-  // iat
   // 機械語の中には仮想アドレスを渡す必要がある
   putchar = IMAGEBASE + IDATA_RVA + idata.length;
   idata += ilt;
-
   idata += funcs;
   idata += dllnames;
-
   return idata;
 }
 
