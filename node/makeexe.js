@@ -86,13 +86,15 @@ function makeidata(dlls) {
   var iat_rva   = ilt_rva + ilt_len;
   var funcs_rva = iat_rva + ilt_len;
   var dlls_rva  = funcs_rva + funcs_len;
-  var ilt = "", funcs = "", dllnames = "";
+  var ilt = "", funcs = "", dllnames = "", addrs = {};
   for (var dll in dlls) {
     idata += convLEs(4, [ilt_rva + ilt.length, 0, 0,
                          dlls_rva + dllnames.length,
                          iat_rva + ilt.length]);
     var fs = dlls[dll];
     for (var i = 0; i < fs.length; i++) {
+      // 機械語の中には仮想アドレスを渡す必要がある
+      addrs[fs[i]] = IMAGEBASE + iat_rva + ilt.length;
       ilt += convLE(4, funcs_rva + funcs.length);
       funcs += "\0\0" + fs[i] + "\0";
       funcs += align(funcs, 2);
@@ -100,14 +102,8 @@ function makeidata(dlls) {
     ilt += convLE(4, 0);
     dllnames += dll + "\0";
   }
-  idata += zero(5 * 4);
-  idata += ilt;
-  // 機械語の中には仮想アドレスを渡す必要がある
-  putchar = IMAGEBASE + IDATA_RVA + idata.length;
-  idata += ilt;
-  idata += funcs;
-  idata += dllnames;
-  return idata;
+  idata += zero(5 * 4) + ilt + ilt + funcs + dllnames;
+  return {"idata": idata, "addrs": addrs};
 }
 
 var idata = makeidata({"msvcrt.dll": ["putchar", "getchar"],
@@ -119,7 +115,7 @@ var text = "";
 text += "\x6a\x41";         // push 0x41
 text += "\xff\x15";         // call [putchar]
 // 機械語の中には仮想アドレスを渡す必要がある
-text += convLE(4, putchar);
+text += convLE(4, idata.addrs.putchar);
 text += "\x58";             // pop eax
 text += "\xc3";             // ret
 
@@ -164,7 +160,7 @@ codes += convLEs(2, [5, 1, 0, 0, 5, 1]);
 codes += convLEs(4, [0, 0x3000, 0x0200, 0]);
 codes += convLEs(2, [3, 0]);
 codes += convLEs(4, [0x100000, 0x1000, 0x100000, 0x1000, 0, 16]);
-codes += convLEs(4, [0, 0, 0x2000, idata.length]);
+codes += convLEs(4, [0, 0, 0x2000, idata.idata.length]);
 codes += zero(14 * 8);
 
 // sects .text
@@ -177,7 +173,7 @@ codes += convLE (4, 0x60000020);
 // sects .idata
 codes += ".idata";
 codes += align(codes, 8);
-codes += convLEs(4, [idata.length, IDATA_RVA, 0x0200, 0x0400, 0, 0]);
+codes += convLEs(4, [idata.idata.length, IDATA_RVA, 0x0200, 0x0400, 0, 0]);
 codes += convLEs(2, [0, 0]);
 codes += convLE (4, 0xc0300040);
 
@@ -188,7 +184,7 @@ codes += text;
 codes += align(codes, 0x0200);
 
 // .idata
-codes += idata;
+codes += idata.idata;
 codes += align(codes, 0x0200);
 
 fs.writeFileSync("a.exe", codes, "binary");
