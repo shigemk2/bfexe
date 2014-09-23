@@ -108,14 +108,14 @@ function main(src) {
     return {"idata": idata, "addrs": addrs};
   }
 
-  var idata = makeidata({"msvcrt.dll": ["putchar", "getchar"]});
+  var idata = makeidata({"msvcrt.dll": ["putchar", "getchar", "exit"]});
 
 
   function maketext(src) {
     // EXEの実際の処理部分
     var text = "";
-    text += "\x56";                         // push esi
-    // text += "\xbe\x00\x30\x40\x00";         // mov esi, 0x403000
+    //text += "\x56";                         // push esi
+    text += "\xbe\x00\x30\x40\x00";         // mov esi, 0x403000
     var begin = [];
     for (var pc = 0; pc < src.length; pc++) {
       switch (src[pc]) {
@@ -152,15 +152,20 @@ function main(src) {
         var ad1 = begin.pop();
         var ad2 = text.length + 5;
         text = text.substring(0, ad1 + 5) +
-            convLE(ad2 - (ad1 + 9)) +
+            convLE(4, ad2 - (ad1 + 9)) +
             text.substring(ad1 + 9);
-        text += "\xe9" + convLE(ad1 - ad2); // jmp near begin
+        text += "\xe9" + convLE(4, ad1 - ad2); // jmp near begin
         break;
       }
     }
-    text += "\x5e";            // pop esi
-    text += "\xb8" + zero(4); // mov eax, 0
-    text += "\xc3";           // ret
+    //text += "\x5e";            // pop esi
+    //text += "\xb8" + zero(4); // mov eax, 0
+    //text += "\xc3";           // ret
+    text += "\x6a\x00"; // push 0
+    text += "\xff\x15";                 // call
+    text += convLE(4, idata.addrs.exit);
+    console.log(text.length);
+
     return text;
   }
 
@@ -193,7 +198,7 @@ function main(src) {
 
   // nth.FileHeader
   codes += "PE\0\0";
-  codes += convLEs(2, [0x14c, 2]);
+  codes += convLEs(2, [0x14c, 3]);
   codes += convLEs(4, [0x4da65f9b, 0, 0]);
   codes += convLEs(2, [0xe0, 0x102]);
 
@@ -204,7 +209,7 @@ function main(src) {
   codes += convLEs(4, [0x0200, 0, 0, 0x1000, 0x1000, 0x2000,
                        IMAGEBASE, 0x1000, 0x200]);
   codes += convLEs(2, [5, 1, 0, 0, 5, 1]);
-  codes += convLEs(4, [0, 0x3000, 0x0200, 0]);
+  codes += convLEs(4, [0, 0xb000, 0x0200, 0]);
   codes += convLEs(2, [3, 0]);
   codes += convLEs(4, [0x100000, 0x1000, 0x100000, 0x1000, 0, 16]);
   codes += convLEs(4, [0, 0, 0x2000, idata.idata.length]);
@@ -223,6 +228,14 @@ function main(src) {
   codes += convLEs(4, [idata.idata.length, IDATA_RVA, 0x0200, 0x0400, 0, 0]);
   codes += convLEs(2, [0, 0]);
   codes += convLE (4, 0xc0300040);
+
+  // sects .bss
+  codes += ".bss";
+  codes += align(codes, 8);
+  // メモリ上のサイズ bfのメモリは30000
+  codes += convLEs(4, [30000, 0x3000, 0, 0, 0, 0]);
+  codes += convLEs(2, [0, 0]);
+  codes += convLE (4, 0xc0600080);
 
   codes += align(codes, 0x0200);
 
