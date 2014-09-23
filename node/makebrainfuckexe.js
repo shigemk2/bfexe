@@ -112,14 +112,19 @@ var idata = makeidata({"msvcrt.dll": ["putchar", "getchar"],
                        "kernel32.dll": ["ExitProcess"]});
 
 
-// EXEの実際の処理部分
-var text = "";
-text += "\x6a\x42";         // push 0x41
-text += "\xff\x15";         // call [putchar]
-// 機械語の中には仮想アドレスを渡す必要がある
-text += convLE(4, idata.addrs.putchar);
-text += "\x58";             // pop eax
-text += "\xc3";             // ret
+function maketext() {
+  // EXEの実際の処理部分
+  var text = "";
+  text += "\x6a\x42";         // push 0x41
+  text += "\xff\x15";         // call [putchar]
+  // 機械語の中には仮想アドレスを渡す必要がある
+  text += convLE(4, idata.addrs.putchar);
+  text += "\x58";             // pop eax
+  text += "\xc3";             // ret
+  return text;
+}
+
+var text = maketext();
 
 // バイナリ出力
 // codesの中身をファイルに出力する
