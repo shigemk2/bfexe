@@ -108,8 +108,7 @@ function main(src) {
     return {"idata": idata, "addrs": addrs};
   }
 
-  var idata = makeidata({"msvcrt.dll": ["putchar", "getchar"],
-                         "kernel32.dll": ["ExitProcess"]});
+  var idata = makeidata({"msvcrt.dll": ["putchar", "getchar"]});
 
 
   function maketext(src) {
