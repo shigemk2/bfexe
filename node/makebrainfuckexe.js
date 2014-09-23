@@ -164,7 +164,6 @@ function main(src) {
     text += "\x6a\x00"; // push 0
     text += "\xff\x15";                 // call
     text += convLE(4, idata.addrs.exit);
-    console.log(text.length);
 
     return text;
   }
