@@ -115,12 +115,53 @@ function main(src) {
   function maketext(src) {
     // EXEの実際の処理部分
     var text = "";
-    text += "\x6a\x42";         // push 0x41
-    text += "\xff\x15";         // call [putchar]
-    // 機械語の中には仮想アドレスを渡す必要がある
-    text += convLE(4, idata.addrs.putchar);
-    text += "\x58";             // pop eax
-    text += "\xc3";             // ret
+    text += "\x56";                         // push esi
+    text += "\xbe\x00\x30\x40\x00";         // mov esi, 0x403000
+    var begin = [];
+    for (var pc = 0; pc < src.length; pc++) {
+      switch (src[pc]) {
+      case "+":
+        text += "\xfe\x06";                 // inc byte ptr[esi]
+        break;
+      case "-":
+        text += "\xfe\x0e";                 // dec byte ptr[esi]
+        break;
+      case ">":
+        text += "\x46";                     // inc esi
+        break;
+      case "<":
+        text += "\x4e";                     // dec esi
+        break;
+      case ".":
+        text += "\x0f\xb6\x06";             // movzx eax, byte ptr[esi]
+        text += "\x50";                     // push eax
+        text += "\xff\x15";                 // call
+        text += convLE(4, idata.addrs.putchar);
+        text += "\x83\xc4\x04";             // add esp, 4
+        break;
+      case ",":
+        text += "\xff\x15";                 // call
+        text += convLE(4, idata.addrs.getchar);
+        text += "\x88\x06";                 // mov byte ptr[esi], al
+        break;
+      case "[":
+        begin.push(text.length);
+        text += "\x80\x3e\x00";             // cmp type ptr[esi], 0
+        text += "\x0f\x84" + zero(4);       // jz near ????
+        break;
+      case "]":
+        var ad1 = begin.pop();
+        var ad2 = text.length + 5;
+        text = text.substring(0, ad1 + 5) +
+            convLE(ad2 - (ad1 + 9)) +
+            text.substring(ad1 + 9);
+        text += "\xe9" + convLE(ad1 - ad2); // jmp near begin
+        break;
+      }
+    }
+    text += "\x5e";            // pop esi
+    text += "\xb8" + zero(4); // mov eax, 0
+    text += "\xc3";           // ret
     return text;
   }
 
