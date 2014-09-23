@@ -1,6 +1,6 @@
 function main(src) {
   const IMAGEBASE = 0x400000;
-  const IDATA_RVA = 0x2000;
+  const IDATA_RVA = 0x11000;
 
   /**
    * 指定されたlenだけバイト文字列vをリトルエンディアン変換する
@@ -205,26 +205,26 @@ function main(src) {
   codes += convLE (2, 0x10b);
   codes += convLEs(1, [10, 0]);
   // ImageBaseのデフォルトは0x400000
-  codes += convLEs(4, [0x0200, 0, 0, 0x1000, 0x1000, 0x2000,
+  codes += convLEs(4, [0x10000, 0, 0, 0x1000, 0x1000, 0x11000,
                        IMAGEBASE, 0x1000, 0x200]);
   codes += convLEs(2, [5, 1, 0, 0, 5, 1]);
-  codes += convLEs(4, [0, 0xb000, 0x0200, 0]);
+  codes += convLEs(4, [0, 0x1a000, 0x0200, 0]);
   codes += convLEs(2, [3, 0]);
-  codes += convLEs(4, [0x100000, 0x1000, 0x100000, 0x1000, 0, 16]);
-  codes += convLEs(4, [0, 0, 0x2000, idata.idata.length]);
+  codes += convLEs(4, [0x100000, 0x10000, 0x100000, 0x1000, 0, 16]);
+  codes += convLEs(4, [0, 0, 0x11000, idata.idata.length]);
   codes += zero(14 * 8);
 
   // sects .text
   codes += ".text";
   codes += align(codes, 8);
-  codes += convLEs(4, [text.length, 0x1000, 0x0200, 0x0200, 0, 0]);
+  codes += convLEs(4, [text.length, 0x10000, 0x0200, 0x10000, 0, 0]);
   codes += convLEs(2, [0, 0]);
   codes += convLE (4, 0x60000020);
 
   // sects .idata
   codes += ".idata";
   codes += align(codes, 8);
-  codes += convLEs(4, [idata.idata.length, IDATA_RVA, 0x0200, 0x0400, 0, 0]);
+  codes += convLEs(4, [idata.idata.length, IDATA_RVA, 0x0200, 0x10200, 0, 0]);
   codes += convLEs(2, [0, 0]);
   codes += convLE (4, 0xc0300040);
 
@@ -232,7 +232,7 @@ function main(src) {
   codes += ".bss";
   codes += align(codes, 8);
   // メモリ上のサイズ bfのメモリは30000
-  codes += convLEs(4, [30000, 0x3000, 0, 0, 0, 0]);
+  codes += convLEs(4, [30000, 0x12000, 0, 0, 0, 0]);
   codes += convLEs(2, [0, 0]);
   codes += convLE (4, 0xc0600080);
 
@@ -240,7 +240,7 @@ function main(src) {
 
   // .text
   codes += text;
-  codes += align(codes, 0x0200);
+  codes += zero(0x10200 - codes.length);
 
   // .idata
   codes += idata.idata;
