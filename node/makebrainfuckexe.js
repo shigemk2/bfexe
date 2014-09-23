@@ -115,7 +115,7 @@ function main(src) {
     // EXEの実際の処理部分
     var text = "";
     //text += "\x56";                         // push esi
-    text += "\xbe\x00\x30\x40\x00";         // mov esi, 0x403000
+    text += "\xbe" + convLE(4, 0x412000);     // mov esi, 0x403000
     var begin = [];
     for (var pc = 0; pc < src.length; pc++) {
       switch (src[pc]) {
@@ -164,6 +164,11 @@ function main(src) {
     text += "\x6a\x00"; // push 0
     text += "\xff\x15";                 // call
     text += convLE(4, idata.addrs.exit);
+
+    if (text.length > 0x10000) {
+      console.log("File size is too big. text size is ", text.length);
+      process.exit(1);
+    }
 
     return text;
   }
@@ -217,7 +222,7 @@ function main(src) {
   // sects .text
   codes += ".text";
   codes += align(codes, 8);
-  codes += convLEs(4, [text.length, 0x10000, 0x0200, 0x10000, 0, 0]);
+  codes += convLEs(4, [text.length, 0x1000, 0x10000, 0x200, 0, 0]);
   codes += convLEs(2, [0, 0]);
   codes += convLE (4, 0x60000020);
 
