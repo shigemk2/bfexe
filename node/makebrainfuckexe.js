@@ -116,7 +116,7 @@ function main(src) {
     // EXEの実際の処理部分
     var text = "";
     text += "\x56";                         // push esi
-    text += "\xbe\x00\x30\x40\x00";         // mov esi, 0x403000
+    // text += "\xbe\x00\x30\x40\x00";         // mov esi, 0x403000
     var begin = [];
     for (var pc = 0; pc < src.length; pc++) {
       switch (src[pc]) {
