@@ -114,7 +114,7 @@ var idata = makeidata({"msvcrt.dll": ["putchar", "getchar"],
 
 // EXEの実際の処理部分
 var text = "";
-text += "\x6a\x41";         // push 0x41
+text += "\x6a\x42";         // push 0x41
 text += "\xff\x15";         // call [putchar]
 // 機械語の中には仮想アドレスを渡す必要がある
 text += convLE(4, idata.addrs.putchar);
@@ -189,5 +189,5 @@ codes += align(codes, 0x0200);
 codes += idata.idata;
 codes += align(codes, 0x0200);
 
-fs.writeFileSync("a.exe", codes, "binary");
+fs.writeFileSync("b.exe", codes, "binary");
 
