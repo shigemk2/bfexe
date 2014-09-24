@@ -114,8 +114,8 @@ function main(src) {
   function maketext(src) {
     // EXEの実際の処理部分
     var text = "";
-    //text += "\x56";                         // push esi
-    text += "\xbe" + convLE(4, 0x412000);     // mov esi, 0x403000
+    //text += "\x56";                       // push esi
+    text += "\xbe" + convLE(4, 0x412000);   // mov esi, 0x403000
     var begin = [];
     for (var pc = 0; pc < src.length; pc++) {
       switch (src[pc]) {
@@ -158,11 +158,11 @@ function main(src) {
         break;
       }
     }
-    //text += "\x5e";            // pop esi
+    //text += "\x5e";           // pop esi
     //text += "\xb8" + zero(4); // mov eax, 0
     //text += "\xc3";           // ret
-    text += "\x6a\x00"; // push 0
-    text += "\xff\x15";                 // call
+    text += "\x6a\x00";         // push 0
+    text += "\xff\x15";         // call
     text += convLE(4, idata.addrs.exit);
 
     if (text.length > 0x10000) {
