@@ -193,4 +193,4 @@ codes += idata.idata;
 codes += align(codes, 0x0200);
 
 var fs = require("fs");
-fs.writeFileSync("a.exe", codes, "binary");
+fs.writeFileSync("sh3-a.exe", codes, "binary");
