@@ -111,17 +111,21 @@ function makeidata(dlls) {
 var idata = makeidata({"coredll.dll": ["putchar", "getchar", "exit"]});
 
 var text = convLEs(2, [
-  0xd003, // 11000: mov.l 0x11010,r0 ! putchar
+  0xd005, // 11000: mov.l 0x11018,r0 ! putchar
   0x6002, // 11002: mov.l @r0,r0
   0x400b, // 11004: jsr @r0
   0xe441, // 11006:   mov #'A',r4
-  0xd002, // 11008: mov.l 0x11014,r0 ! exit
+  0xd003, // 11008: mov.l 0x11018,r0 ! putchar
   0x6002, // 1100a: mov.l @r0,r0
   0x400b, // 1100c: jsr @r0
-  0xe442 // 1100e:   mov #'B',r4
+  0xe442, // 1100e:   mov #'B',r4
+  0xd002, // 11010: mov.l 0x1101c,r0 ! exit
+  0x6002, // 11012: mov.l @r0,r0
+  0x400b, // 11014: jsr @r0
+  0xe442  // 11016:   mov #0,r4
 ]) + convLEs(4, [
-  /* 11010: */ idata.addrs.putchar,
-  /* 11014: */ idata.addrs.putchar
+  /* 11018: */ idata.addrs.putchar,
+  /* 1101c: */ idata.addrs.exit
 ]);
 
 // バイナリ出力
