@@ -118,10 +118,10 @@ var text = convLEs(2, [
   0xd002, // 11008: mov.l 0x11014,r0 ! exit
   0x6002, // 1100a: mov.l @r0,r0
   0x400b, // 1100c: jsr @r0
-  0xe400, // 1100e:   mov #'A',r4
+  0xe442 // 1100e:   mov #'B',r4
 ]) + convLEs(4, [
   /* 11010: */ idata.addrs.putchar,
-  /* 11014: */ idata.addrs.exit
+  /* 11014: */ idata.addrs.putchar
 ]);
 
 // バイナリ出力
