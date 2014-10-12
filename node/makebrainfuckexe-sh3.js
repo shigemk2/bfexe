@@ -38,7 +38,7 @@ function convLEs(len, vs) {
  *
  * @method zero
  * @param {Int} len 桁数
- * @return {String} ret lenの数ぶんの0
+ * @return {String} ret lenの数ぶんの\0
  */
 function zero(len) {
   var ret = "";
@@ -51,7 +51,7 @@ function zero(len) {
 /**
  * aの倍数ぶん0詰めする
  *
- * @example "abc" という文字列があって、8の倍数ぶんだけ0詰めしたい場合は、align("abc", 8)とすると、"00000"が返ってくる
+ * @example "abc" という文字列があって、8の倍数ぶんだけ0詰めしたい場合は、align("abc", 8)とすると、"\0\0\0\0\0"が返ってくる
  *
  * @method align
  * @param {String} bytes 文字列
