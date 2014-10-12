@@ -111,15 +111,26 @@ function makeidata(dlls) {
 var idata = makeidata({"coredll.dll": ["putchar", "getchar", "exit"]});
 
 var text = convLEs(2, [
-  0xd801, // 11000: mov.l 0x11008,r8
-  0xd902, // 11002: mov.l 0x1100c,r9  ! getchar
-  0xda02, // 11004: mov.l 0x11010,r10 ! putchar
-  0xdb03, // 11006: mov.l 0x11014,r11 ! exit
+  0xd802, // 11000: mov.l 0x11008,r8
+  0xd903, // 11002: mov.l 0x1100c,r9  ! getchar
+  0xda03, // 11004: mov.l 0x11010,r10 ! putchar
+  0xdb04, // 11006: mov.l 0x11014,r11 ! exit
+  // 遅延スロット
+  0xa008, // 11008: bra 0x1101c
+  0x0009, // 1100a:   nop
 ]) + convLEs(4, [
-  /* 11008: */ 0, /* 初期化 */
-  /* 1100c: */ idata.addrs.getchar,
-  /* 11010: */ idata.addrs.putchar,
-  /* 11014: */ idata.addrs.exit
+  /* 1100c: */ 0, /* 初期化 */
+  /* 11010: */ idata.addrs.getchar,
+  /* 11014: */ idata.addrs.putchar,
+  /* 11018: */ idata.addrs.exit
+]) + convLEs(2, [
+  0x60a2, // 1101c: mov.l @r10,r0
+  0x400b, // 1101e: jsr @r0
+  0xe441, // 11020:   mov #'A',r4
+
+  0x60b2, // 11022: mov.l @r11,r0
+  0x400b, // 11024: jsr @r0
+  0xe400  // 11026:   mov #0,r4
 ]);
 
 // バイナリ出力
