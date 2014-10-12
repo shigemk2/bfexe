@@ -126,16 +126,69 @@ var text = convLEs(2, [
   // 遅延スロット
   0x0009, // 11012:   nop
 ]) + convLEs(4, [
-  /* 11014: */ 0, /* 初期化 */
+  /* 11014: */ 0x22000, /* 初期化 */
   /* 11018: */ idata.addrs.getchar,
   /* 1101c: */ idata.addrs.putchar,
   /* 11020: */ idata.addrs.exit
-]) + convLEs(2, [
-  0x4a0b, // 11024: jsr @r10
-  0xe441, // 11026:   mov #'A',r4
+]);
 
-  0x4b0b, // 11028: jsr @r11
-  0xe400  // 1102a:   mov #0,r4
+var begin = [];
+for (var pc = 0; pc < src.length; pc++) {
+  switch (src[pc]) {
+  case "+":
+    text += convLEs(2, [
+      0x6180, // mov.b   @r8,r1
+      0x7101, // add     #1,r1
+      0x2810, // mov.b   r1,@r8
+    ]);
+    break;
+  case "-":
+    text += convLEs(2, [
+      0x6180, // mov.b   @r8,r1
+      0x71ff, // add     #-1,r1
+      0x2810, // mov.b   r1,@r8
+    ]);
+    break;
+  case ">":
+    text += convLEs(2, [
+      0x7801, // add     #1,r8
+    ]);
+    break;
+  case "<":
+    text += convLEs(2, [
+      0x78ff, // add     #-1,r8
+    ]);
+    break;
+  case ".":
+    text += convLEs(2, [
+      0x4a0b, // jsr @r10
+      0x6480, //   mov.b @r8,r4
+    ]);
+    break;
+  // case ",":
+  //   text += "\xff\x15";                 // call
+  //   text += convLE(4, idata.addrs.getchar);
+  //   text += "\x88\x06";                 // mov byte ptr[esi], al
+  //   break;
+  // case "[":
+  //   begin.push(text.length);
+  //   text += "\x80\x3e\x00";             // cmp type ptr[esi], 0
+  //   text += "\x0f\x84" + zero(4);       // jz near ????
+  //   break;
+  // case "]":
+  //   var ad1 = begin.pop();
+  //   var ad2 = text.length + 5;
+  //   text = text.substring(0, ad1 + 5) +
+  //       convLE(4, ad2 - (ad1 + 9)) +
+  //       text.substring(ad1 + 9);
+  //   text += "\xe9" + convLE(4, ad1 - ad2); // jmp near begin
+  //   break;
+  }
+}
+
+text += convLEs(2, [
+  0x4b0b, // jsr @r11
+  0xe400  // mov #0,r4
 ]);
 
 // バイナリ出力
