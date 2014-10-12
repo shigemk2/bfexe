@@ -119,10 +119,10 @@ var text = convLEs(2, [
   0x6002, // 1100a: mov.l @r0,r0
   0x400b, // 1100c: jsr @r0
   0xe465, // 1100e:   mov #'e',r4
-  0xd003, // 11000: mov.l 0x11020,r0 ! putchar
-  0x6002, // 11002: mov.l @r0,r0
-  0x400b, // 11004: jsr @r0
-  0xe46c, // 11006:   mov #'l',r4
+  0xd003, // 11010: mov.l 0x11020,r0 ! putchar
+  0x6002, // 11012: mov.l @r0,r0
+  0x400b, // 11014: jsr @r0
+  0xe46c, // 11016:   mov #'l',r4
   0xd002, // 11018: mov.l 0x11024,r0 ! exit
   0x6002, // 1101a: mov.l @r0,r0
   0x400b, // 1101c: jsr @r0
