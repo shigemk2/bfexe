@@ -110,6 +110,9 @@ function makeidata(dlls) {
 
 var idata = makeidata({"coredll.dll": ["putchar", "getchar", "exit"]});
 
+var fs = require('fs');
+var src = fs.readFileSync(process.argv[2], 'utf8');
+
 var text = convLEs(2, [
   0xd804, // 11000: mov.l 0x11008,r8
   0xd905, // 11002: mov.l 0x1100c,r9  ! getchar
@@ -211,5 +214,5 @@ codes += zero(0x10200 - codes.length);
 codes += idata.idata;
 codes += align(codes, 0x0200);
 
-var fs = require("fs");
 fs.writeFileSync("sh3-b.exe", codes, "binary");
+
