@@ -184,7 +184,7 @@ for (var pc = 0; pc < src.length; pc++) {
       0x8b06, // +4: bf    +14
       0x0009, // +6:   nop
       0xd101, // +8: mov.l +10,r1
-      0x414b, // +a: jmp   @r1
+      0x412b, // +a: jmp   @r1
       0x0009, // +c:   nop
       0x0009, // +e: nop
     ]) + convLE(4, 0); // +10: ????; +14:
