@@ -189,7 +189,7 @@ for (var pc = 0; pc < src.length; pc++) {
 
 text += convLEs(2, [
   0x4b0b, // jsr @r11
-  0xe400  // mov #0,r4
+  0xe400  //   mov #0,r4
 ]);
 
 // バイナリ出力
