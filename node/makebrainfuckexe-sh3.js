@@ -165,11 +165,12 @@ for (var pc = 0; pc < src.length; pc++) {
       0x6480, //   mov.b @r8,r4
     ]);
     break;
-  // case ",":
-  //   text += "\xff\x15";                 // call
-  //   text += convLE(4, idata.addrs.getchar);
-  //   text += "\x88\x06";                 // mov byte ptr[esi], al
-  //   break;
+  case ",":
+    text += convLEs(2, [
+      0x490b, // jsr @r9
+      0x6480, //   mov.b @r8,r4
+    ]);
+    break;
   // case "[":
   //   begin.push(text.length);
   //   text += "\x80\x3e\x00";             // cmp type ptr[esi], 0
