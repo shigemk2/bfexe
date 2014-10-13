@@ -172,19 +172,40 @@ for (var pc = 0; pc < src.length; pc++) {
       0x2800, // mov.b r0,@r8
     ]);
     break;
-  // case "[":
-  //   begin.push(text.length);
-  //   text += "\x80\x3e\x00";             // cmp type ptr[esi], 0
-  //   text += "\x0f\x84" + zero(4);       // jz near ????
-  //   break;
-  // case "]":
-  //   var ad1 = begin.pop();
-  //   var ad2 = text.length + 5;
-  //   text = text.substring(0, ad1 + 5) +
-  //       convLE(4, ad2 - (ad1 + 9)) +
-  //       text.substring(ad1 + 9);
-  //   text += "\xe9" + convLE(4, ad1 - ad2); // jmp near begin
-  //   break;
+  case "[":
+    // align 4
+    if (text.length % 4 != 0) {
+        text += convLE(2, 0x0009); // nop
+    }
+    begin.push(text.length);
+    text += convLEs(2, [
+      0x6180, // +0: mov.b @r8,r1
+      0x2118, // +2: tst   r1,r1
+      0x8b06, // +4: bf    +14
+      0x0009, // +6:   nop
+      0xd101, // +8: mov.l +10,r1
+      0x414b, // +a: jmp   @r1
+      0x0009, // +c:   nop
+      0x0009, // +e: nop
+    ]) + convLE(4, 0); // +10: ????; +14:
+    break;
+  case "]":
+    // align 4
+    if (text.length % 4 != 0) {
+        text += convLE(2, 0x0009); // nop
+    }
+    var ad1 = begin.pop();
+    var ad2 = text.length + 0xc;
+    text = text.substring(0, ad1 + 0x10) +
+        convLE(4, IMAGEBASE + 0x1000 + ad2) +
+        text.substring(ad1 + 0x14);
+    text += convLEs(2, [
+      0xd101, // +0: mov.l +8,r1
+      0x412b, // +2: jmp   @r1
+      0x0009, // +4:   nop
+      0x0009, // +6: nop
+    ]) + convLE(4, IMAGEBASE + 0x1000 + ad1); // +8: begin; +c
+    break;
   }
 }
 
