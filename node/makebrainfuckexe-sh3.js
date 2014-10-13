@@ -168,7 +168,8 @@ for (var pc = 0; pc < src.length; pc++) {
   case ",":
     text += convLEs(2, [
       0x490b, // jsr @r9
-      0x6480, //   mov.b @r8,r4
+      0x0009, //   nop
+      0x2800, // mov.b r0,@r8
     ]);
     break;
   // case "[":
